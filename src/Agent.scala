@@ -1,8 +1,9 @@
 import Capability.allCapabilities
-import Chooser.{chooseFrom, ifHappens, randomDouble, randomInt, randomSubset}
+import Chooser.{choose, chooseFrom, ifHappens, randomDouble, randomInt, randomSubset}
 import Configuration._
 import Math.sqrt
-import Utilities.toMap
+import Term.terms
+import Utilities.{createMap, toMap}
 import scala.annotation.tailrec
 
 // Static methods to help construct an agent
@@ -52,11 +53,8 @@ class Agent (network: Network) {
   // The probability that this agent will request a service in any round
   val requestProbability = randomDouble (MinimumRequestProbability, 1.0)
 
-  // The agent's competence at performing each of its capabilities, with regard to the quality of the result
-  val qualityCompetence: Map[Capability, Double] = toMap (capabilities) (_ => chooseFrom (List (-1.0, 0.0, 1.0)).get)
-
-  // The agent's competence at performing each of its capabilities, with regard to the timeliness of the response
-  val timelinessCompetence: Map[Capability, Double] = toMap (capabilities) (_ => chooseFrom (List (-1.0, 0.0, 1.0)).get)
+  // The agent's competence at performing each of its capabilities, with regard to each term (provision feature)
+  val competence: Map[Capability, Map[Term, Double]] = createMap (capabilities) (createMap (terms) (chooseFrom (PossibleCompetencies)))
 
   // The secondary capabilities for which the agent must depend on a subprovider
   val dependentFor: List[Capability] = capabilities.flatMap (_.dependsOn).filter (!capabilities.contains (_))
@@ -78,7 +76,7 @@ class Agent (network: Network) {
 
   // Select new sub-providers and choose a new period before the next re-selection
   def reselect () {
-    subproviders = toMap (dependentFor) (capability => chooseFrom (network.capableOf (capability)).get)
+    subproviders = toMap (dependentFor) (capability => chooseFrom (network.capableOf (capability)))
     periodToSwitch = randomInt (MinimumSwitchPeriod, MaximumSwitchPeriod + 1)
   }
 
@@ -89,34 +87,23 @@ class Agent (network: Network) {
 
   // Request that this agent perform a service interacting with a client, storing and returning the provenance record documenting what happened
   def provideService (client: Agent, service: Capability, round: Int): Interaction = {
+    // Combine the competence of this agent with that of another to get overall ratings
+    def affected (b: Map[Term, Double]): Map[Term, Double] =
+      competence (service).map {case (term, abilityA) => (term, (abilityA + b (term)) / 2.0)}
     // Create an interaction where no sub-provider is required
     def provideServiceWithoutDependence: Interaction =
       ifHappens (FreakEventProbability) (provideServiceWithFreakEvent) (provideBasicService)
     // Create an interaction where no mitigating circumstances occur
-    def provideBasicService: Interaction = {
-      val timeliness = timelinessCompetence (service)
-      val quality = qualityCompetence (service)
-      val rating = (timeliness + quality) / 2.0
-      BasicProvision (client, this, service, rating, round, timeliness, quality)
-    }
+    def provideBasicService: Interaction =
+      BasicProvision (client, this, service, round, competence (service))
     // Create an interaction where a freak event affects provision
-    def provideServiceWithFreakEvent: Interaction = {
-      val timelinessBefore = timelinessCompetence (service)
-      val qualityBefore = qualityCompetence (service)
-      val timeliness = (timelinessBefore + FreakEventDelay) / 2.0
-      val quality = (qualityBefore + FreakEventDestruction) / 2.0
-      val rating = (timeliness + quality) / 2.0
-      FreakEvent (client, this, service, rating, round, timeliness, quality, timelinessBefore, qualityBefore, "storm")
-    }
+    def provideServiceWithFreakEvent: Interaction =
+      FreakEvent (client, this, service, round, affected (FreakEventEffects), competence (service), "storm")
     // Create an interaction where provision relies on a sub-provider
     def provideServiceWithDependence (subservice: Capability): Interaction = {
       val subprovider = subproviders (subservice)
-      val subTimeliness = subprovider.timelinessCompetence (subservice)
-      val subQuality = subprovider.qualityCompetence (subservice)
-      val timeliness = (subTimeliness + timelinessCompetence (service)) / 2.0
-      val quality = (subQuality + qualityCompetence (service)) / 2.0
-      val rating = (timeliness + quality) / 2.0
-      WithSubProvider (client, this, service, rating, round, timeliness, quality, subprovider, subservice, subTimeliness, subQuality)
+      val subcompetence = subprovider.competence (subservice)
+      WithSubProvider (client, this, service, round, affected (subcompetence), subprovider, subservice, subcompetence)
     }
 
     val interaction = service.dependsOn match {

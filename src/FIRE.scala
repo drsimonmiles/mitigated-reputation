@@ -1,52 +1,54 @@
 import Chooser.ifHappens
 import Configuration.{ExplorationProbability, RecencyScalingFactor}
+import Term.terms
+import Utilities.average
 
 // The core FIRE strategy but leaving unspecified how to calculate trust from gathered interactions
 trait FIRECore extends Strategy {
   // Select the provider mostly using FIRE's model
-  def selectProvider (network: Network, client: Agent, service: Capability, round: Int): Option[Agent] = {
+  def selectProvider (network: Network, client: Agent, service: Capability, round: Int): Agent = {
     // Choose first agent in list, except if exploration probability met try a later agent recursively
     def selectMostTrustworthy (orderedProviders: List[Agent]): Option[Agent] = orderedProviders match {
       case Nil => None
       case mostTrusted :: rest => ifHappens (ExplorationProbability) (selectMostTrustworthy (rest)) (Some (mostTrusted))
     }
 
+    // Order the potential providers by their overall trust value
     val orderedProviders = network.capableOf (service).sortBy (calculateTrust (client, _, service, round)).reverse
-    selectMostTrustworthy (orderedProviders)
+    // Explore the set of providers, but if none chosen in exploration, choose the most trustworthy
+    selectMostTrustworthy (orderedProviders).getOrElse (orderedProviders.head)
   }
 
-  // Calculates the trust in a provider for a service: T_K(a, b, c)
+  // Calculates the trust in a provider for a service
   def calculateTrust (client: Agent, provider: Agent, service: Capability, round: Int): Double = {
+    // Gather all relevant interaction records
     val interactions = client.gatherProvenance (provider, service)
-    calculateTrustFromInteractions (interactions, round)
+    // Per term, calculate the weighted trust value based on the interactions
+    def calculateTermTrust (term: Term): Double = {
+      val weightsAndRatings = interactions.map (interaction => (calculateRelevance (interaction, term, round), interaction.ratings (term)))
+      val weightedRatings = weightsAndRatings.map (x => x._1 * x._2).sum
+      val weightsSum = weightsAndRatings.map (_._1).sum
+      weightedRatings / weightsSum
+    }
+    // Average over the term-specific trust values
+    average (terms.map (calculateTermTrust))
   }
 
-  // Calculate trust from a given set of interactions
-  def calculateTrustFromInteractions (interactions: Set[Interaction], round: Int): Double
+  def calculateRecency (interaction: Interaction, round: Int): Double =
+    Math.pow (Math.E, -((round - interaction.round) / RecencyScalingFactor))
 
   // Calculates the relevance of an interaction: omega_K(r_i)
-  def calculateRelevance (interaction: Interaction, round: Int): Double =
-    Math.pow (Math.E, -((round - interaction.round) / RecencyScalingFactor))
+  def calculateRelevance (interaction: Interaction, term: Term, round: Int): Double
 }
 
 // FIRE strategy implementation using recency to weight ratings
 object FIRE extends Strategy with FIRECore {
   val name = "FIRE"
-
-  // Calculate trust using recency as in FIRE paper
-  def calculateTrustFromInteractions (interactions: Set[Interaction], round: Int): Double = {
-    val weightsAndRatings = interactions.map (interaction => (calculateRelevance (interaction, round), interaction.rating))
-    val weightedRatings = weightsAndRatings.map (x => x._1 * x._2).sum
-    val weightsSum = weightsAndRatings.map (_._1).sum
-    weightedRatings / weightsSum
-  }
+  def calculateRelevance (interaction: Interaction, term: Term, round: Int): Double = calculateRecency (interaction, round)
 }
 
 // Variation on FIRE where recency is not accounted for
 object FIREWithoutRecency extends Strategy with FIRECore {
   val name = "FIREWithoutRecency"
-
-  // Calculate trust without caring about recency
-  def calculateTrustFromInteractions (interactions: Set[Interaction], round: Int): Double =
-    interactions.map (_.rating).sum / interactions.size
+  def calculateRelevance (interaction: Interaction, term: Term, round: Int): Double = 1.0
 }

@@ -2,12 +2,13 @@ import scala.util.Random
 
 // Utility functions based on random selection
 object Chooser extends Random {
-  // Selects a random value from a list
-  def chooseFrom[V] (all: Seq[V]): Option[V] =
-    if (all.size == 0)
-      None
-    else
-      Some (all (nextInt (all.size)))
+  // Selects a random value from a list (throws exception IndexOutOfBoundsException if the list is empty)
+  def choose[V] (items: V*): V =
+    items (nextInt (items.size))
+
+  // Selects a random value from a list (throws exception IndexOutOfBoundsException if the list is empty)
+  def chooseFrom[V] (all: Seq[V]): V =
+    all (nextInt (all.size))
 
   // Tests a random number against the given probability, executing ifMet if passed, ifNotMet if not
   def ifHappens[V] (probability: Double) (ifMet: => V) (ifNotMet: => V): V =

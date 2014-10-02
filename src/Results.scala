@@ -25,5 +25,6 @@ object Results {
       out.print (",")
       out.println (Strategies.map (strategy => average (strategy, round)).mkString (","))
     }
+    println ((Strategies.map (strategy => strategy.name + " final: " + average (strategy, NumberOfRounds - 1))).mkString ("\n"))
   }
 }

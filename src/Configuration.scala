@@ -1,13 +1,16 @@
 import java.lang.Math.{log, sqrt, PI}
+import Chooser.randomDouble
+import Term.terms
+import Utilities.createMap
 
 // Configuration of the simulation
 object Configuration {
   // Number of rounds to simulate per strategy tested
-  val NumberOfRounds = 200
+  val NumberOfRounds = 300
   // Number of simulations to average over per strategy tested
-  val NumberOfSimulations = 20
+  val NumberOfSimulations = 10
   // Strategies to be simulated
-  val Strategies = List (Mitigating, NoStrategy, FIRE, FIREWithoutRecency)
+  val Strategies = List (Mitigating, NoStrategy, FIRE)
 
   // Number of agents in a simulated network
   val NumberOfAgents = 200
@@ -22,6 +25,13 @@ object Configuration {
   val NumberOfPrimaryCapabilities = 10
   // Number of capabilities per agent
   val NumberOfCapabilitiesPerAgent = 3
+  
+  // Number of terms (service provision features) per service
+  val NumberOfTerms = 2
+  // Number of possible competency values between 0.0 and 1.0 for a specific agent, capability and term
+  val NumberOfCompetencies = 11
+  // Possible competency values
+  val PossibleCompetencies = (0 until NumberOfCompetencies).map (_.toDouble / (NumberOfCompetencies - 1))
 
   // Minimum per-agent probability for requesting in a given round
   val MinimumRequestProbability = 0.5
@@ -38,20 +48,18 @@ object Configuration {
   val MemoryLimit = (-RecencyScalingFactor * log (IrrelevancyWeight)).round.toInt
 
   // Probability that a primary capability depends on a secondary capability to be performed
-  val ProbabilityOfDependence = 0.3
+  val ProbabilityOfDependence = 0.75
   // Minimum number of rounds between an agent choosing new sub-providers
   val MinimumSwitchPeriod = 5
   // Maximum number of rounds between an agent choosing new sub-providers
   val MaximumSwitchPeriod = 15
 
   // Probability of a freak event affecting provision of a service for which no sub-service is required
-  val FreakEventProbability = 0.01
+  val FreakEventProbability = 0.1
   // The effect of a freak event on the timeliness of provision
-  val FreakEventDelay = -1.0
-  // The effect of a freak event on the quality of provision
-  val FreakEventDestruction = -0.5
+  val FreakEventEffects = createMap (terms) (randomDouble (-1.0, -0.5))
 
-  // How unconvincing each mitigating circumstance is (0.0 is fully convincing, 1.0 is not at all)
+  // How unconvincing each mitigating circumstance is (1.0 is not at all, 0.0 is fully convincing)
   val PoorSubproviderDubiousness = 0.2
   val FreakEventDubiousness = 0.1
   val PoorOrganisationCultureDubiousness = 0.2
