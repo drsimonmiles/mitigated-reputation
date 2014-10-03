@@ -6,14 +6,14 @@ import Utilities.createMap
 // Configuration of the simulation
 object Configuration {
   // Number of rounds to simulate per strategy tested
-  val NumberOfRounds = 300
+  val NumberOfRounds = 100
   // Number of simulations to average over per strategy tested
   val NumberOfSimulations = 10
   // Strategies to be simulated
-  val Strategies = List (Mitigating, NoStrategy, FIRE)
+  val Strategies = List (FIRE, Mitigating, NoStrategy)
 
   // Number of agents in a simulated network
-  val NumberOfAgents = 200
+  val NumberOfAgents = 100
   // Size of neighbourhood-determining spherical grid world
   val GridWidth = 500
   // The number of neighbours each agent should have on average
@@ -22,16 +22,16 @@ object Configuration {
   val NeighbourRadius = sqrt (ExpectedNumberOfNeighbours / (NumberOfAgents * PI)) * GridWidth
 
   // Number of capabilities clients can request as services (primary capabilities)
-  val NumberOfPrimaryCapabilities = 10
+  val NumberOfPrimaryCapabilities = 5
   // Number of capabilities per agent
   val NumberOfCapabilitiesPerAgent = 3
   
   // Number of terms (service provision features) per service
   val NumberOfTerms = 2
-  // Number of possible competency values between 0.0 and 1.0 for a specific agent, capability and term
+  // Number of possible competency values between -1.0 and 1.0 for a specific agent, capability and term
   val NumberOfCompetencies = 11
   // Possible competency values
-  val PossibleCompetencies = (0 until NumberOfCompetencies).map (_.toDouble / (NumberOfCompetencies - 1))
+  val PossibleCompetencies = (0 until NumberOfCompetencies).map (_.toDouble * 2.0 / (NumberOfCompetencies - 1) - 1.0)
 
   // Minimum per-agent probability for requesting in a given round
   val MinimumRequestProbability = 0.5
@@ -48,14 +48,14 @@ object Configuration {
   val MemoryLimit = (-RecencyScalingFactor * log (IrrelevancyWeight)).round.toInt
 
   // Probability that a primary capability depends on a secondary capability to be performed
-  val ProbabilityOfDependence = 0.75
+  val ProbabilityOfDependence = 0.0 //0.75
   // Minimum number of rounds between an agent choosing new sub-providers
   val MinimumSwitchPeriod = 5
   // Maximum number of rounds between an agent choosing new sub-providers
   val MaximumSwitchPeriod = 15
 
   // Probability of a freak event affecting provision of a service for which no sub-service is required
-  val FreakEventProbability = 0.1
+  val FreakEventProbability = 0.2
   // The effect of a freak event on the timeliness of provision
   val FreakEventEffects = createMap (terms) (randomDouble (-1.0, -0.5))
 
