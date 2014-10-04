@@ -6,14 +6,14 @@ import Utilities.createMap
 // Configuration of the simulation
 object Configuration {
   // Number of rounds to simulate per strategy tested
-  val NumberOfRounds = 100
+  val NumberOfRounds = 300
   // Number of simulations to average over per strategy tested
-  val NumberOfSimulations = 10
+  val NumberOfSimulations = 20
   // Strategies to be simulated
   val Strategies = List (FIRE, Mitigating, NoStrategy)
 
   // Number of agents in a simulated network
-  val NumberOfAgents = 100
+  val NumberOfAgents = 200
   // Size of neighbourhood-determining spherical grid world
   val GridWidth = 500
   // The number of neighbours each agent should have on average
@@ -48,7 +48,7 @@ object Configuration {
   val MemoryLimit = (-RecencyScalingFactor * log (IrrelevancyWeight)).round.toInt
 
   // Probability that a primary capability depends on a secondary capability to be performed
-  val ProbabilityOfDependence = 0.0 //0.75
+  val ProbabilityOfDependence = 0.75
   // Minimum number of rounds between an agent choosing new sub-providers
   val MinimumSwitchPeriod = 5
   // Maximum number of rounds between an agent choosing new sub-providers
@@ -60,7 +60,7 @@ object Configuration {
   val FreakEventEffects = createMap (terms) (randomDouble (-1.0, -0.5))
 
   // How unconvincing each mitigating circumstance is (1.0 is not at all, 0.0 is fully convincing)
-  val PoorSubproviderDubiousness = 0.2
+  val DifferentSubproviderDubiousness = 0.5
   val FreakEventDubiousness = 0.1
   val PoorOrganisationCultureDubiousness = 0.2
 }
