@@ -1,6 +1,5 @@
 import Chooser.ifHappens
 import Configuration.{ExplorationProbability, RecencyScalingFactor}
-import Term.terms
 import Utilities.average
 
 // The core FIRE strategy but leaving unspecified how to calculate trust from gathered interactions
@@ -14,13 +13,13 @@ trait FIRECore extends Strategy {
     }
 
     // Order the potential providers by their overall trust value
-    val orderedProviders = network.capableOf (service).sortBy (calculateTrust (client, _, service, round)).reverse
+    val orderedProviders = network.capableOf (service).sortBy (calculateTrust (network, client, _, service, round)).reverse
     // Explore the set of providers, but if none chosen in exploration, choose the most trustworthy
     selectMostTrustworthy (orderedProviders).getOrElse (orderedProviders.head)
   }
 
   // Calculates the trust in a provider for a service
-  def calculateTrust (client: Agent, provider: Agent, service: Capability, round: Int): Double = {
+  def calculateTrust (network: Network, client: Agent, provider: Agent, service: Capability, round: Int): Double = {
     // Gather all relevant interaction records
     val interactions = client.gatherProvenance (provider, service)
     // Per term, calculate the weighted trust value based on the interactions
@@ -31,7 +30,7 @@ trait FIRECore extends Strategy {
       weightedRatings / weightsSum
     }
     // Average over the term-specific trust values
-    average (terms.map (calculateTermTrust))
+    average (network.terms.map (calculateTermTrust))
   }
 
   def calculateRecency (interaction: Interaction, round: Int): Double =

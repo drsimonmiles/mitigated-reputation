@@ -1,8 +1,6 @@
-import Capability.allCapabilities
-import Chooser.{choose, chooseFrom, ifHappens, randomDouble, randomInt, randomSubset}
+import Chooser.{chooseFrom, ifHappens, randomDouble, randomInt, randomSubset}
 import Configuration._
 import Math.sqrt
-import Term.terms
 import Utilities.{createMap, toMap}
 import scala.annotation.tailrec
 
@@ -38,11 +36,13 @@ import Agent._
 
 // An agent in the network
 class Agent (network: Network) {
+  import network._
+
   // The agent's (x, y) position in the neighbourhood-determining grid
   val position = (randomInt (0, GridWidth), randomInt (0, GridWidth))
 
   // The agent's neighbours in the network (lazily loaded to ensure all agents in network created before neighbours chosen)
-  lazy val neighbours: Set[Agent] = network.agents.filter (other => other != this && distance (this, other) <= NeighbourRadius).toSet
+  lazy val neighbours: Set[Agent] = agents.filter (other => other != this && distance (this, other) <= NeighbourRadius).toSet
 
   // All direct and indirect acquaintances of this agent, including this agent itself
   lazy val acquaintances: Set[Agent] = gatherAcquaintances (this)
@@ -60,10 +60,16 @@ class Agent (network: Network) {
   val dependentFor: List[Capability] = capabilities.flatMap (_.dependsOn).filter (!capabilities.contains (_))
 
   // Rounds until the next re-selection of sub-providers (first set on initialisation)
-  var periodToSwitch: Int = 0
+  var periodToSwitchSubproviders: Int = 0
 
   // Sub-providers currently chosen to provide capabilities the agent depends on others for (first set on initialisation)
   var subproviders: Map[Capability, Agent] = Map ()
+
+  // Rounds until the next re-selection of owner organisation (first set on initialisation)
+  var periodToSwitchOrganisation: Int = 0
+
+  // Organisation currently employing this agent
+  var organisation: Organisation = null
 
   // History of interactions this agent has been engaged in as a client
   var provenanceStore: List[Interaction] = Nil
@@ -76,34 +82,51 @@ class Agent (network: Network) {
 
   // Select new sub-providers and choose a new period before the next re-selection
   def reselect () {
-    subproviders = toMap (dependentFor) (capability => chooseFrom (network.capableOf (capability)))
-    periodToSwitch = randomInt (MinimumSwitchPeriod, MaximumSwitchPeriod + 1)
+    subproviders = toMap (dependentFor) (capability => chooseFrom (capableOf (capability)))
+    periodToSwitchSubproviders = randomInt (MinimumSwitchPeriod, MaximumSwitchPeriod + 1)
+    organisation = chooseFrom (organisations)
+    periodToSwitchOrganisation = randomInt (MinimumSwitchPeriod, MaximumSwitchPeriod + 1)
   }
 
   // Records the completion of a round, triggering re-selection of sub-providers if appropriate
   def endOfRound () {
-    if (periodToSwitch <= 1) reselect () else periodToSwitch -= 1
+    if (periodToSwitchSubproviders <= 1) reselect () else periodToSwitchSubproviders -= 1
   }
 
   // Request that this agent perform a service interacting with a client, storing and returning the provenance record documenting what happened
   def provideService (client: Agent, service: Capability, round: Int): Interaction = {
+    val orgCompetence = organisation.competence (service)
     // Combine the competence of this agent with that of another to get overall ratings
-    def affected (b: Map[Term, Double]): Map[Term, Double] =
-      competence (service).map {case (term, abilityA) => (term, (abilityA + b (term)) / 2.0)}
+    def affected (a: Map[Term, Double], b: Map[Term, Double]): Map[Term, Double] =
+      a.map {case (term, abilityA) => (term, (abilityA + b (term)) / 2.0)}
     // Create an interaction where no sub-provider is required
     def provideServiceWithoutDependence: Interaction =
       ifHappens (FreakEventProbability) (provideServiceWithFreakEvent) (provideBasicService)
     // Create an interaction where no mitigating circumstances occur
     def provideBasicService: Interaction =
-      BasicProvision (client, this, service, round, competence (service))
+      if (OrganisationsMatter)
+        BasicProvision (client, this, service, organisation, round, affected (competence (service), orgCompetence))
+      else
+        BasicProvision (client, this, service, organisation, round, competence (service))
     // Create an interaction where a freak event affects provision
-    def provideServiceWithFreakEvent: Interaction =
-      FreakEvent (client, this, service, round, affected (FreakEventEffects), competence (service), "storm")
+    def provideServiceWithFreakEvent: Interaction = {
+      val prior =
+        if (OrganisationsMatter)
+          affected (competence (service), orgCompetence)
+        else
+          competence (service)
+      FreakEvent (client, this, service, organisation, round, affected (prior, freakEventEffects), prior, "storm")
+    }
     // Create an interaction where provision relies on a sub-provider
     def provideServiceWithDependence (subservice: Capability): Interaction = {
       val subprovider = subproviders (subservice)
       val subcompetence = subprovider.competence (subservice)
-      WithSubProvider (client, this, service, round, affected (subcompetence), subprovider, subservice, subcompetence)
+      val finalCompetence =
+        if (OrganisationsMatter)
+          affected (affected (competence (service), orgCompetence), subcompetence)
+        else
+          affected (competence (service), subcompetence)
+      WithSubProvider (client, this, service, organisation, round, finalCompetence, subprovider, subservice, subcompetence)
     }
 
     val interaction = service.dependsOn match {

@@ -1,7 +1,6 @@
 import java.io.{File, FileWriter, BufferedWriter, PrintWriter}
 import java.text.SimpleDateFormat
 import java.util.Date
-import Capability.primaryCapabilities
 import Chooser.{chooseFrom, randomDouble}
 import Configuration.{NumberOfRounds, NumberOfSimulations, Strategies}
 import Results.{record, write}
@@ -13,10 +12,7 @@ object Simulation extends App {
   def simulateStrategy (strategy: Strategy, simulation: Int) {
     val network = Network ()
     var runningUtility = 0.0
-
-    // The utility gained from a single interaction
-    def utility (interaction: Interaction) =
-      average (interaction.ratings.values)
+    import network._
 
     // Perform one round of the simulation
     def tick (round: Int) {
@@ -45,6 +41,12 @@ object Simulation extends App {
     }
     println ()
   }
+
+  // The utility gained from a single interaction
+  def utility (interaction: Interaction) =
+    average (interaction.ratings.values)
+
+  // MAIN APPLICATION CODE BELOW
 
   // Simulate the system for each selection strategy
   for (strategy <- Strategies)
