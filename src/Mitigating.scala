@@ -1,10 +1,8 @@
 import Configuration.{FreakEventDubiousness, DifferentSubproviderDubiousness, DifferentOrganisationCultureDubiousness, OrganisationsMatter}
 
 // A strategy accounting for specific situations and mitigating circumstances
-object Mitigating extends Strategy with FIRECore {
-  val name = "Mitigating"
-
-  def calculateRelevance (interaction: Interaction, term: Term, round: Int): Double = {
+abstract class MitigatingCore extends Strategy with FIRECore {
+  def calculateMitigation (interaction: Interaction, term: Term): Double = {
     val orgDubiousness =
       if (OrganisationsMatter && interaction.organisation != interaction.provider.organisation)
         DifferentOrganisationCultureDubiousness
@@ -21,4 +19,18 @@ object Mitigating extends Strategy with FIRECore {
         orgDubiousness
     }
   }
+}
+
+object Mitigating extends MitigatingCore {
+  val name = "Mitigating"
+
+  def calculateRelevance (interaction: Interaction, term: Term, round: Int): Double =
+    calculateMitigation (interaction, term)
+}
+
+object MitigatingWithRecency extends MitigatingCore {
+  val name = "MitigatingWithRecency"
+
+  def calculateRelevance (interaction: Interaction, term: Term, round: Int): Double =
+    calculateRecency (interaction, round) * calculateMitigation (interaction, term)
 }

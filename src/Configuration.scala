@@ -7,7 +7,7 @@ object Configuration {
   // Number of simulations to average over per strategy tested
   val NumberOfSimulations = 10
   // Strategies to be simulated
-  val Strategies = List (FIRE, Mitigating, NoStrategy)
+  val Strategies = List (FIRE, FIREWithoutRecency, Mitigating, NoStrategy)
 
   // Number of agents in a simulated network
   val NumberOfAgents = 100
@@ -24,6 +24,12 @@ object Configuration {
   val NumberOfOrganisations = 10
   // Probability of an organisation having a bad culture
   val ProbabilityOfBadCulture = 0.3
+  // Normalised effect of good and bad organisation culture on service provision
+  val CultureEffects =
+    if (ProbabilityOfBadCulture < 0.5)
+      (ProbabilityOfBadCulture / (1.0 - ProbabilityOfBadCulture), -1.0)
+    else
+      (1.0, (1.0 - ProbabilityOfBadCulture) / ProbabilityOfBadCulture)
 
   // Number of capabilities clients can request as services (primary capabilities)
   val NumberOfPrimaryCapabilities = 5

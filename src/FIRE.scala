@@ -1,3 +1,5 @@
+import java.lang.Math._
+
 import Chooser.ifHappens
 import Configuration.{ExplorationProbability, RecencyScalingFactor}
 import Utilities.average
