@@ -17,6 +17,9 @@ object Utilities {
   def createMap[V, W] (keys: Iterable[V]) (createValue: => W): Map[V, W] =
     toMap (keys) (_ => createValue)
 
+  def createMutableMap[V, W] (keys: Iterable[V]) (createValue: => W): mutable.Map[V, W] =
+    toMutableMap (keys) (_ => createValue)
+
   // Creates an immutable map from a list, with the original list as keys, and values created from the keys
   def toMap[V, W] (list: Iterable[V]) (createValue: V => W): Map[V, W] =
     list.map (item => (item, createValue (item))).toMap

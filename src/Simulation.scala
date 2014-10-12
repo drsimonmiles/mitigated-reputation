@@ -1,9 +1,9 @@
-import java.io.{File, FileWriter, BufferedWriter, PrintWriter}
 import java.text.SimpleDateFormat
 import java.util.Date
 import Chooser.{chooseFrom, randomDouble}
-import Configuration.{NumberOfRounds, NumberOfSimulations, Strategies}
-import Results.{record, write}
+import Configuration.{NumberOfRounds, NumberOfSimulations, ResultsFile, Strategies}
+import Results.{record, utilities}
+import ResultsAccess.{loadAll, writeAll, writeAverages}
 import Utilities.average
 
 // The program root application, which simulates each strategy and outputs cumulative utility
@@ -18,7 +18,7 @@ object Simulation extends App {
     def tick (round: Int) {
       // Perform a set of client-provider interactions, selecting the provider based on the current strategy
       val interactions: List[Interaction] =
-        //for (client <- randomSubset (network.agents, NumberOfRequestsPerRound);
+      //for (client <- randomSubset (network.agents, NumberOfRequestsPerRound);
         for (client <- network.agents
              if randomDouble (0.0, 1.0) < client.requestProbability;
              service = chooseFrom (primaryCapabilities)) yield
@@ -58,9 +58,13 @@ object Simulation extends App {
     }
 
   val format = new SimpleDateFormat ("MM-dd-HH-mm")
-  val file = new File ("results-" + format.format (new Date)  + ".csv")
-  println ("Recording to " + file.getAbsolutePath)
-  val out = new PrintWriter (new BufferedWriter (new FileWriter (file)))
-  write (out)
-  out.close ()
+  val currentAverages = "current-" + format.format (new Date) + ".csv"
+  val cumulativeAverages = "cumulative-" + format.format (new Date) + ".csv"
+
+  println ("Recording results to " + ResultsFile)
+  writeAll (utilities)
+  println ("Writing current averages to " + currentAverages)
+  writeAverages (utilities, currentAverages)
+  println ("Writing cumulative averages to " + cumulativeAverages)
+  writeAverages (loadAll, cumulativeAverages)
 }

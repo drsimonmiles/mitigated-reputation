@@ -8,6 +8,8 @@ object Configuration {
   val NumberOfSimulations = 10
   // Strategies to be simulated
   val Strategies = List (FIRE, FIREWithoutRecency, Mitigating, NoStrategy)
+  // Name of file to add result data to
+  val ResultsFile = "100Agents1000RoundsWithOrgs.csv"
 
   // Number of agents in a simulated network
   val NumberOfAgents = 100
