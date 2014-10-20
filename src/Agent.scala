@@ -51,7 +51,7 @@ class Agent (network: Network) {
   val capabilities: List[Capability] = randomSubset (allCapabilities, NumberOfCapabilitiesPerAgent)
 
   // The probability that this agent will request a service in any round
-  val requestProbability = randomDouble (MinimumRequestProbability, 1.0)
+  val requestProbability = MinimumRequestProbability //randomDouble (MinimumRequestProbability, 1.0)
 
   // The agent's competence at performing each of its capabilities, with regard to each term (provision feature)
   val competence: Map[Capability, Map[Term, Double]] = createMap (capabilities) (createMap (terms) (chooseFrom (PossibleCompetencies)))
@@ -96,7 +96,7 @@ class Agent (network: Network) {
   // Request that this agent perform a service interacting with a client, storing and returning the provenance record documenting what happened
   def provideService (client: Agent, service: Capability, round: Int): Interaction = {
     val orgCompetence = organisation.competence (service)
-    // Combine the competence of this agent with that of another to get overall ratings
+    // Combine the competence of one agent with that of another to get overall ratings
     def affected (a: Map[Term, Double], b: Map[Term, Double]): Map[Term, Double] =
       a.map {case (term, abilityA) => (term, (abilityA + b (term)) / 2.0)}
     // Create an interaction where no sub-provider is required
@@ -149,4 +149,8 @@ class Agent (network: Network) {
   // Retrieve the provenance records related to a given provider and a given service type from the agent's own store and that of its acquaintances
   def gatherProvenance (provider: Agent, service: Capability): Set[Interaction] =
     acquaintances.flatMap (_.provenanceStore.filter (interaction => interaction.provider == provider && interaction.service == service))
+
+  def clear () {
+    provenanceStore = Nil
+  }
 }

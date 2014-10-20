@@ -1,4 +1,4 @@
-import Configuration.{FreakEventDubiousness, DifferentSubproviderDubiousness, DifferentOrganisationCultureDubiousness, OrganisationsMatter}
+import Configuration._
 
 // A strategy accounting for specific situations and mitigating circumstances
 abstract class MitigatingCore extends Strategy with FIRECore {
@@ -12,11 +12,13 @@ abstract class MitigatingCore extends Strategy with FIRECore {
       case WithSubProvider (_, provider, _, organisation, _, _, subprovider, subservice, subratings)
         if provider.subproviders (subservice) != subprovider =>
         DifferentSubproviderDubiousness * orgDubiousness
-      case FreakEvent (_, _, _, organisation, _, ratings, beforeEvent, _)
-        if ratings (term) < 0.0 && beforeEvent (term) > 0.0 =>
-        FreakEventDubiousness * orgDubiousness
-      case _ =>
+      case WithSubProvider (_, provider, _, organisation, _, _, subprovider, subservice, subratings)
+        if provider.subproviders (subservice) == subprovider =>
         orgDubiousness
+      case FreakEvent (_, _, _, organisation, _, ratings, beforeEvent, _) =>
+        FreakEventDubiousness * orgDubiousness
+      case BasicProvision (_, _, _, _, _, _) =>
+        NonFreakEventDubiousness * orgDubiousness
     }
   }
 }

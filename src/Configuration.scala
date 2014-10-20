@@ -5,11 +5,11 @@ object Configuration {
   // Number of rounds to simulate per strategy tested
   val NumberOfRounds = 1000
   // Number of simulations to average over per strategy tested
-  val NumberOfSimulations = 10
+  val NumberOfSimulations = 30
   // Strategies to be simulated
-  val Strategies = List (FIRE, FIREWithoutRecency, Mitigating, NoStrategy)
+  val Strategies = List (Mitigating, FIRE, FIREWithoutRecency, NoStrategy)
   // Name of file to add result data to
-  val ResultsFile = "100Agents1000RoundsWithOrgs.csv"
+  val ResultsFile = "FreakOnly-100agents.csv"
 
   // Number of agents in a simulated network
   val NumberOfAgents = 100
@@ -21,7 +21,7 @@ object Configuration {
   val NeighbourRadius = sqrt (ExpectedNumberOfNeighbours / (NumberOfAgents * PI)) * GridWidth
 
   // Whether organisations have any affect in the simulations
-  val OrganisationsMatter = true
+  val OrganisationsMatter = false
   // Number of organisations in a simulated network to which agents can belong
   val NumberOfOrganisations = 10
   // Probability of an organisation having a bad culture
@@ -60,9 +60,9 @@ object Configuration {
   val MemoryLimit = (-RecencyScalingFactor * log (IrrelevancyWeight)).round.toInt
 
   // Probability that a primary capability depends on a secondary capability to be performed
-  val ProbabilityOfDependence = 1.0
+  val ProbabilityOfDependence = 0.0
   // Minimum number of rounds between an agent choosing new sub-providers or organisation
-  val MinimumSwitchPeriod = 5
+  val MinimumSwitchPeriod = 1
   // Maximum number of rounds between an agent choosing new sub-providers or organisation
   val MaximumSwitchPeriod = 15
 
@@ -71,6 +71,7 @@ object Configuration {
 
   // How unconvincing each mitigating circumstance is (1.0 is not at all, 0.0 is fully convincing)
   val DifferentSubproviderDubiousness = 0.5
-  val FreakEventDubiousness = 0.1
+  val FreakEventDubiousness = FreakEventProbability
+  val NonFreakEventDubiousness = 1.0 - FreakEventProbability
   val DifferentOrganisationCultureDubiousness = 0.5
 }

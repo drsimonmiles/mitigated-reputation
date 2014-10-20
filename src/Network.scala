@@ -25,7 +25,7 @@ class Network private () {
   val agents = List.fill (NumberOfAgents) (new Agent (this))
 
   // The effect of a freak event on the timeliness of provision in this network
-  val freakEventEffects = createMap (terms) (randomDouble (-1.0, -0.5))
+  val freakEventEffects = createMap (terms) (1.0) //randomDouble (-1.0, -0.5))
 
   // A map from each capability to the agents with that capability
   val capableOf: Map[Capability, List[Agent]] = toMap (allCapabilities) { capability =>
@@ -39,6 +39,10 @@ class Network private () {
   // Initialise all agents in the network
   def initialise () {
     agents.foreach (_.initialise ())
+  }
+
+  def clear () {
+    agents.foreach (_.clear ())
   }
 }
 

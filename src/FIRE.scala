@@ -1,5 +1,4 @@
-import java.lang.Math._
-
+import java.lang.Math.{E, pow}
 import Chooser.ifHappens
 import Configuration.{ExplorationProbability, RecencyScalingFactor}
 import Utilities.average
@@ -36,7 +35,7 @@ trait FIRECore extends Strategy {
   }
 
   def calculateRecency (interaction: Interaction, round: Int): Double =
-    Math.pow (Math.E, -((round - interaction.round) / RecencyScalingFactor))
+    pow (E, -((round - interaction.round) / RecencyScalingFactor))
 
   // Calculates the relevance of an interaction: omega_K(r_i)
   def calculateRelevance (interaction: Interaction, term: Term, round: Int): Double
