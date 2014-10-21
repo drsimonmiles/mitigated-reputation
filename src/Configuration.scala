@@ -14,9 +14,9 @@ object Configuration {
   // Whether organisations have any affect in the simulations, i.e. whether we model the bad organisation circumstance
   val OrganisationsMatter = false
   // Whether any services require sub-providers, i.e. whether we model the bad sub-provider circumstance
-  val SubprovidersRequired = false
+  val SubprovidersRequired = true
   // Whether freak events occur, i.e. whether we model the freak event circumstance
-  val FreakEventsOccur = true
+  val FreakEventsOccur = false
 
   // Number of agents in a simulated network
   val NumberOfAgents = 100
@@ -45,13 +45,18 @@ object Configuration {
   
   // Number of terms (service provision features) per service
   val NumberOfTerms = 2
-  // Number of possible competency values between -1.0 and 1.0 for a specific agent, capability and term
-  val NumberOfCompetencies = 11
-  // Possible competency values
-  val PossibleCompetencies = (0 until NumberOfCompetencies).map (_.toDouble * 2.0 / (NumberOfCompetencies - 1) - 1.0)
+  // Probability that an agent is a good provider of services
+  val GoodProviderProbability = 0.5
+  // Number of possible competency values between -1.0 and 0.0 for bad providers, or 0.0 and 1.0 for good providers,
+  //   for each specific agent, capability and term
+  val NumberOfCompetencies = 7
+  // Possible competency values for good providers
+  val PossibleGoodCompetencies = (0 until NumberOfCompetencies).map (_.toDouble / (NumberOfCompetencies - 1))
+  // Possible competency values for bad providers
+  val PossibleBadCompetencies = PossibleGoodCompetencies.map (_ - 1.0)
 
-  // Minimum per-agent probability for requesting in a given round
-  val MinimumRequestProbability = 0.1
+  // Probability that each agent will request a service in a given round
+  val RequestProbability = 0.1
   // Probability that a client will not choose the most trustworthy provider (and, if not, the probability it will not choose the next, etc.)
   val ExplorationProbability = 0.2
 
@@ -74,7 +79,7 @@ object Configuration {
   // Probability of a freak event affecting provision of a service for which no sub-service is required
   val FreakEventProbability = if (FreakEventsOccur) 0.25 else 0.0
 
-  // How unconvincing each mitigating circumstance is (1.0 is not at all, 0.0 is fully convincing)
+  // How relevant each past interaction with a mitigating circumstance is for future provisions (0.0 is fully irrelevant, 1.0 is fully relevant)
   val DifferentSubproviderDubiousness = 0.5
   val FreakEventDubiousness = FreakEventProbability
   val NonFreakEventDubiousness = 1.0 - FreakEventProbability

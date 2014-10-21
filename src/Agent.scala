@@ -50,11 +50,15 @@ class Agent (network: Network) {
   // The agent's set of capabilities
   val capabilities: List[Capability] = randomSubset (allCapabilities, NumberOfCapabilitiesPerAgent)
 
-  // The probability that this agent will request a service in any round
-  val requestProbability = MinimumRequestProbability //randomDouble (MinimumRequestProbability, 1.0)
+  // Whether this agent is a good service provider
+  val goodProvider = randomDouble (0.0, 1.0) < GoodProviderProbability
 
   // The agent's competence at performing each of its capabilities, with regard to each term (provision feature)
-  val competence: Map[Capability, Map[Term, Double]] = createMap (capabilities) (createMap (terms) (chooseFrom (PossibleCompetencies)))
+  val competence: Map[Capability, Map[Term, Double]] =
+    if (goodProvider)
+      createMap (capabilities) (createMap (terms) (chooseFrom (PossibleGoodCompetencies)))
+    else
+      createMap (capabilities) (createMap (terms) (chooseFrom (PossibleBadCompetencies)))
 
   // The secondary capabilities for which the agent must depend on a subprovider
   val dependentFor: List[Capability] = capabilities.flatMap (_.dependsOn).filter (!capabilities.contains (_))

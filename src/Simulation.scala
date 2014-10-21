@@ -1,7 +1,7 @@
 import java.text.SimpleDateFormat
 import java.util.Date
 import Chooser.{chooseFrom, randomDouble}
-import Configuration.{NumberOfRounds, NumberOfSimulations, ResultsFile, Strategies}
+import Configuration._
 import Results.{record, cumulativeUtilities, oneSimUtilities}
 import ResultsAccess.{loadAll, writeAll, writeAverages, writeOneSimulation}
 import Utilities.average
@@ -20,7 +20,7 @@ object Simulation extends App {
         // Perform a set of client-provider interactions, selecting the provider based on the current strategy
         val interactions: List[Interaction] =
           for (client <- network.agents
-               if randomDouble (0.0, 1.0) < client.requestProbability;
+               if randomDouble (0.0, 1.0) <= RequestProbability;
                service = chooseFrom (primaryCapabilities)) yield
             strategy.selectProvider (network, client, service, round).provideService (client, service, round)
         // Calculate the utility from the captured interactions
