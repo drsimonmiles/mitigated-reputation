@@ -9,7 +9,14 @@ object Configuration {
   // Strategies to be simulated
   val Strategies = List (Mitigating, FIRE, FIREWithoutRecency, NoStrategy)
   // Name of file to add result data to
-  val ResultsFile = "FreakOnly-100agents.csv"
+  val ResultsFile = "FreakOnly-request10pc.csv"
+
+  // Whether organisations have any affect in the simulations, i.e. whether we model the bad organisation circumstance
+  val OrganisationsMatter = false
+  // Whether any services require sub-providers, i.e. whether we model the bad sub-provider circumstance
+  val SubprovidersRequired = false
+  // Whether freak events occur, i.e. whether we model the freak event circumstance
+  val FreakEventsOccur = true
 
   // Number of agents in a simulated network
   val NumberOfAgents = 100
@@ -20,13 +27,11 @@ object Configuration {
   // Radius around agent within which other agents are neighbours
   val NeighbourRadius = sqrt (ExpectedNumberOfNeighbours / (NumberOfAgents * PI)) * GridWidth
 
-  // Whether organisations have any affect in the simulations
-  val OrganisationsMatter = false
   // Number of organisations in a simulated network to which agents can belong
   val NumberOfOrganisations = 10
   // Probability of an organisation having a bad culture
   val ProbabilityOfBadCulture = 0.3
-  // Normalised effect of good and bad organisation culture on service provision
+  // Normalised effect of good and bad organisation culture on service provision: tuple of (good effect, bad effect)
   val CultureEffects =
     if (ProbabilityOfBadCulture < 0.5)
       (ProbabilityOfBadCulture / (1.0 - ProbabilityOfBadCulture), -1.0)
@@ -46,7 +51,7 @@ object Configuration {
   val PossibleCompetencies = (0 until NumberOfCompetencies).map (_.toDouble * 2.0 / (NumberOfCompetencies - 1) - 1.0)
 
   // Minimum per-agent probability for requesting in a given round
-  val MinimumRequestProbability = 0.5
+  val MinimumRequestProbability = 0.1
   // Probability that a client will not choose the most trustworthy provider (and, if not, the probability it will not choose the next, etc.)
   val ExplorationProbability = 0.2
 
@@ -60,14 +65,14 @@ object Configuration {
   val MemoryLimit = (-RecencyScalingFactor * log (IrrelevancyWeight)).round.toInt
 
   // Probability that a primary capability depends on a secondary capability to be performed
-  val ProbabilityOfDependence = 0.0
+  val ProbabilityOfDependence = if (SubprovidersRequired) 1.0 else 0.0
   // Minimum number of rounds between an agent choosing new sub-providers or organisation
   val MinimumSwitchPeriod = 1
   // Maximum number of rounds between an agent choosing new sub-providers or organisation
   val MaximumSwitchPeriod = 15
 
   // Probability of a freak event affecting provision of a service for which no sub-service is required
-  val FreakEventProbability = 0.25
+  val FreakEventProbability = if (FreakEventsOccur) 0.25 else 0.0
 
   // How unconvincing each mitigating circumstance is (1.0 is not at all, 0.0 is fully convincing)
   val DifferentSubproviderDubiousness = 0.5

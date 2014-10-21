@@ -63,8 +63,9 @@ object Simulation extends App {
     simulateStrategies (simulation)
 
   val format = new SimpleDateFormat ("MM-dd-HH-mm")
-  val averagesFile = "cumulative-" + format.format (new Date) + ".csv"
-  val oneSimFile = "onesim-" + format.format (new Date) + ".csv"
+  val prefix = ResultsFile.takeWhile (_ != '.')
+  val averagesFile = prefix + "-averages-" + format.format (new Date) + ".csv"
+  val oneSimFile = prefix + "-onesim-" + format.format (new Date) + ".csv"
 
   println ("Recording results to " + ResultsFile)
   writeAll (cumulativeUtilities)
