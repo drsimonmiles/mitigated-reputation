@@ -1,3 +1,6 @@
+/**
+ * (C) 2014 King's College London, University of Warwick
+ */
 import Chooser.chooseFrom
 
 // An agent's strategy for choosing a provider for a service

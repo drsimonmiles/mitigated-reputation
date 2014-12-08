@@ -1,3 +1,7 @@
+/**
+ * (C) 2014 King's College London, University of Warwick
+ */
+
 import Configuration._
 
 // A strategy accounting for specific situations and mitigating circumstances

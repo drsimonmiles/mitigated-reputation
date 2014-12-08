@@ -1,3 +1,7 @@
+/**
+ * (C) 2014 King's College London, University of Warwick
+ */
+
 import Chooser.{getIfHappens, randomDouble}
 import Configuration._
 import Utilities.{createMap, toMap}

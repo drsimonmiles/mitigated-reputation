@@ -1,3 +1,7 @@
+/**
+ * (C) 2014 King's College London, University of Warwick
+ */
+
 // A (summarised, OOP version of a) provenance record concerning an interaction, specialised by different scenarios
 sealed abstract class Interaction {
   val client: Agent

@@ -1,3 +1,7 @@
+/**
+ * (C) 2014 King's College London, University of Warwick
+ */
+
 import java.lang.Math.{log, sqrt, PI}
 
 // Configuration of the simulation

@@ -1,3 +1,7 @@
+/**
+ * (C) 2014 King's College London, University of Warwick
+ */
+
 import java.lang.Math.{E, pow}
 import Chooser.ifHappens
 import Configuration.{ExplorationProbability, RecencyScalingFactor}

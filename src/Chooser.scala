@@ -1,3 +1,7 @@
+/**
+ * (C) 2014 King's College London, University of Warwick
+ */
+
 import scala.util.Random
 
 // Utility functions based on random selection

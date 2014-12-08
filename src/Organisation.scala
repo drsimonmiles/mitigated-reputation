@@ -1,3 +1,6 @@
+/**
+ * (C) 2014 King's College London, University of Warwick
+ */
 import Chooser.ifHappens
 import Configuration.{CultureEffects, ProbabilityOfBadCulture}
 import Utilities.createMap

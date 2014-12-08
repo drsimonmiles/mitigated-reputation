@@ -1,3 +1,7 @@
+/**
+ * (C) 2014 King's College London, University of Warwick
+ */
+
 import Chooser.{chooseFrom, ifHappens, randomDouble, randomInt, randomSubset}
 import Configuration._
 import Math.sqrt

@@ -1,3 +1,7 @@
+/**
+ * (C) 2014 King's College London, University of Warwick
+ */
+
 import java.io.{PrintWriter, FileWriter, FileReader, BufferedReader}
 import Configuration.{NumberOfSimulations, NumberOfRounds, ResultsFile, Strategies}
 import Utilities.{average, createMap, createMutableMap, standardDeviation, toMap}

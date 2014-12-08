@@ -1,3 +1,6 @@
+/**
+ * (C) 2014 King's College London, University of Warwick
+ */
 import java.text.SimpleDateFormat
 import java.util.Date
 import Chooser.{chooseFrom, randomDouble}

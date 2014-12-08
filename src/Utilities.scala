@@ -1,3 +1,6 @@
+/**
+ * (C) 2014 King's College London, University of Warwick
+ */
 import java.lang.Math.sqrt
 import scala.collection.mutable
 
