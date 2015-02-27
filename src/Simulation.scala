@@ -62,8 +62,7 @@ object Simulation extends App {
   // MAIN APPLICATION CODE BELOW
 
   // Simulate the system for each selection strategy
-  for (simulation <- 0 until NumberOfSimulations)
-    simulateStrategies (simulation)
+  (0 until NumberOfSimulations).par.map (simulation => simulateStrategies (simulation))
 
   val format = new SimpleDateFormat ("MM-dd-HH-mm")
   val prefix = ResultsFile.takeWhile (_ != '.')
